@@ -3,6 +3,7 @@ def measurements(richter):
     print("Richter      Joules     Tnt")
     for i in range(0,5):
         print(y[i],    energy(y[i]),      tons_of_tnt(y[i]))
+        return measurements
 
 def energy(richter):
     energy=10**(1.5*richter+4.8)
@@ -15,6 +16,7 @@ def tons_of_tnt(richter):
 def output(richter):
     print("Equivalence in joules: ", energy(richter))
     print("Equivalence in tons of tnt: ", tons_of_tnt(richter))
+    return output
 
 richter=float(input("Please eneter a Richter scale value"))
 print("Richter value: ", richter)
