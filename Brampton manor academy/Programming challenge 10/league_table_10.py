@@ -46,7 +46,7 @@ if __name__ == "__main__":
     file_contents = read_csv(csv_file)
     myDict=(process_results(file_contents))
     for key,value in sorted(myDict.items(), key=lambda e: e[1][4],reverse=True):
-        print(key,value)
+        print(f"{key:<20} {value[0]:<10} {value[1]:<10} {value[2]:<10} {value[3]:<10}{value[4]:<10}")
  
 
 
