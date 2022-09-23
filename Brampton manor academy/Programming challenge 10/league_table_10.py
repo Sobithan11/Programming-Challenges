@@ -44,7 +44,9 @@ def process_results(rows):
         
 if __name__ == "__main__":
     file_contents = read_csv(csv_file)
-    print(process_results(file_contents))
+    myDict=(process_results(file_contents))
+    for key,value in sorted(myDict.items(), key=lambda e: e[1][4],reverse=True):
+        print(key,value)
  
 
 
