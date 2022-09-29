@@ -39,7 +39,6 @@ def process_results(rows):
             dictionary[home][2]+=1
         dictionary[home][3]=dictionary[home][3]+(int(homegoals)-int(awaygoals))
         dictionary[away][3]=dictionary[away][3]+(int(homegoals)-int(awaygoals))
-    print(dictionary)
     return dictionary   
         
 if __name__ == "__main__":
