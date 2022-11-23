@@ -7,7 +7,7 @@ if ask=="encrypt":
         string=""
         message=message.lower()
         for i in message:
-            if ord(i)+key>ord("z"):#121+3=124
+            if ord(i)+key>ord("z"):
                 step1=ord("z")-ord(i)
                 step2=ord("a")+(key-step1-1)
                 string+=chr(step2)
