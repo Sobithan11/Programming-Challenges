@@ -14,7 +14,7 @@ GRID_SIZE = 9
 def ResetDataStructures():
   """
      Return type:2D array,1D array,1D array,1D array
-     Description:
+     Description: Creates 3 1d arrays and 1 2d array. Puzzle has a length of 81, PuzzleGrid is 10 by 10, Solution has a length of 10 and Answer has a length of 162.
   """
 
   Puzzle = [EMPTY_STRING for Line in range(GRID_SIZE * GRID_SIZE)]
@@ -27,7 +27,7 @@ def LoadPuzzleFile(PuzzleName, Puzzle):
   """
      Parameters:String,1D array
      Return type:1D array,Boolean
-     Description:
+     Description: It reads the file line by line and gets rid of the space. It checks if the file is empty and also checks if the file exists.
   """
 
   try:
@@ -55,7 +55,7 @@ def LoadSolution(PuzzleName, Solution):
   """
      Parameters:String, 1D array
      Return type:1d Array,Boolean
-     Description:
+     Description: Opens the solution file and puts the solution into the Solution array and gets rid of the space.
   """
 
   OK = True
@@ -77,7 +77,7 @@ def ResetAnswer(PuzzleName, Answer):
   """
      Parameters:String,1D array
      Return type:1D array
-     Description:
+     Description: Stores the puzzle name in Answer[0]. Answer[1] and [2] is set to 0. The for loop creates a space from Answer[3] to Answer[161] to store the users moves.
   """
 
   Answer[0] = PuzzleName
@@ -91,7 +91,7 @@ def TransferPuzzleIntoGrid(PuzzleName, PuzzleGrid, Puzzle, Answer):
   """
      Parameters:String,2D array, 1D array, 1D array
      Return type:array,1D array,Boolean
-     Description:
+     Description:the first digit of the CellInfo is the row the second digit is the column and the third digit is the number the user wants to input in the corresponding row and column. PuzzleGrid[0][0] is not used so set to X.
   """
 
   OK = True
@@ -116,7 +116,7 @@ def LoadPuzzle(PuzzleGrid, Puzzle, Answer, Solution):
   """
      Parameters:2D array, 1D array, 1D array, 1D array
      Return type:
-     Description:
+     Description: User inputs puzzle name and then it loads the puzzle file and solution and then transfers the puzzle into the grid if OK is true and if it is not then everything is reset.
   """
 
   PuzzleGrid, Puzzle, Answer, Solution = ResetDataStructures()
@@ -134,7 +134,7 @@ def TransferAnswerIntoGrid(PuzzleGrid, Answer):
   """
      Parameters:2D array, 1D array
      Return type:2D array
-     Description:
+     Description: Stores the 3 digit number inputted by the user into Answer and thenput the digit into the row and column
   """
   for Line in range(3, int(Answer[2]) + 3):
     CellInfo = Answer[Line]
@@ -148,7 +148,7 @@ def LoadPartSolvedPuzzle(PuzzleGrid, Puzzle, Answer, Solution):
   """
      Parameters:2D array,1D array, 1D array, 1D array
      Return type:2D array, 1D array, 1D array, 1D array
-     Description:
+     Description:Opens part solved puzzle file and reads each line and gets rid of the space(/n). Stores each CellInfo into the 1d array answer. Checks if puzzle name and cellinfo are equal
   """
   PuzzleGrid, Puzzle, Answer, Solution = LoadPuzzle(PuzzleGrid, Puzzle, Answer, Solution)
   try:
@@ -174,7 +174,7 @@ def LoadPartSolvedPuzzle(PuzzleGrid, Puzzle, Answer, Solution):
 def DisplayGrid(PuzzleGrid):
   """
      Parameters:2D array
-     Description:
+     Description:Displays the puzzle grid 
   """
   print()
   print("   1   2   3   4   5   6   7   8   9  ")
@@ -197,7 +197,7 @@ def SolvePuzzle(PuzzleGrid, Puzzle, Answer):
   """
      Parameters:2D array, 1D array, 1D array
      Return type:2d array, 1D array
-     Description:
+     Description: Allows user to solve puzzle. It asks them to enter a 3 digit number. The firs number is the row, the second is the column and third is the digit. It checks that the third digit is between 1 and 9. The amount of moves they made is stored in answer as well as their inputs.
   """
   DisplayGrid(PuzzleGrid)
   if PuzzleGrid[0][0] != 'X':
@@ -235,6 +235,9 @@ def SolvePuzzle(PuzzleGrid, Puzzle, Answer):
   return PuzzleGrid, Answer
 
 def DisplayMenu():
+  """
+      Description: displays the menu
+  """
   print()
   print("Main Menu")
   print("=========")
@@ -249,7 +252,7 @@ def DisplayMenu():
 def GetMenuOption():
   """
      Return type:String
-     Description:
+     Description: Asks user to enter their choice and make sure they enter a single letter.
   """
   Choice = EMPTY_STRING
   while len(Choice) != 1:
@@ -259,7 +262,7 @@ def GetMenuOption():
 def KeepPuzzle(PuzzleGrid, Answer):
   """
      Parameters:2D array,1D array
-     Description:
+     Description: Writes the numbers youve inputted into the file of the puzzle name and then creates a space and then closes it so your puzzle gets saved.
   """
   if PuzzleGrid[0][0] != 'X':
     print("No puzzle loaded")
@@ -278,7 +281,7 @@ def CheckSolution(PuzzleGrid, Answer, Solution):
   """
      Parameters:2D array,1D array,1D array
      Return type:Integer,Boolean
-     Description:
+     Description: It checks your solution. First it checks is your solution is incomplete then it checks if you have inputted the correct  number. If you have not it increases the error count by one and displays which row and column the error is in.
   """
   ErrorCount = 0
   Solved = False
@@ -305,7 +308,7 @@ def CalculateScore(Answer, ErrorCount):
   """
      Parameters:1D array, Integer
      Return type:1D array
-     Description:
+     Description: This calculates your score 
   """
   Answer[1] = str(int(Answer[1]) - ErrorCount)
   return Answer
@@ -313,7 +316,7 @@ def CalculateScore(Answer, ErrorCount):
 def DisplayResults(Answer):
   """
      Parameters:1D array
-     Description:
+     Description:Displays your score and solution.
   """
   if int(Answer[2]) > 0:
     print(f"Your score is {Answer[1]}")
@@ -325,7 +328,7 @@ def DisplayResults(Answer):
 
 def NumberPuzzle():
   """
-     Description:
+     Description: Goes through all the menu options and loads the appropriate function. If you input C  it checks solution and calculates your score and checks if youve solved the puzzle or not. Also it checks uf youve inputted a correct menu option and generates a random response if you havent..
   """
   Finished = False
   PuzzleGrid, Puzzle, Answer, Solution = ResetDataStructures()
