@@ -174,7 +174,7 @@ def LoadPartSolvedPuzzle(PuzzleGrid, Puzzle, Answer, Solution):
 def DisplayGrid(PuzzleGrid):
   """
      Parameters:2D array
-     Description:Displays the puzzle grid 
+     Description:Creates and displays the puzzle grid 
   """
   print()
   print("   1   2   3   4   5   6   7   8   9  ")
@@ -236,7 +236,7 @@ def SolvePuzzle(PuzzleGrid, Puzzle, Answer):
 
 def DisplayMenu():
   """
-      Description: displays the menu
+      Description: displays the menu options
   """
   print()
   print("Main Menu")
