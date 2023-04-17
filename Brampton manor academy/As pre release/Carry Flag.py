@@ -440,6 +440,7 @@ def ReportRunTimeError(ErrorMessage, Registers):
        Description: If the program runs for too long it produces an error message.
     """
     print("Run time error:", ErrorMessage)
+    Registers[ERR] = 1
     return Registers
 
 
@@ -486,8 +487,6 @@ def ExecuteADD(Memory, Registers, Address):
     """
     Registers[ACC] = Registers[ACC] + Memory[Address].OperandValue
     Registers = SetFlags(Registers[ACC], Registers)
-    if Registers[STATUS] == ConvertToDecimal("0011"):
-        ReportRunTimeError("Overflow", Registers)
     return Registers
 
 
