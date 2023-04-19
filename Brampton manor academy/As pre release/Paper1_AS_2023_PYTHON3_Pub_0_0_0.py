@@ -56,8 +56,8 @@ ERR = 4
 class AssemblerInstruction:
     def __init__(self):
         self.OpCode = EMPTY_STRING
-        self.OperandString = EMPTY_STRING
-        self.OperandValue = 0
+        self.OperandString = EMPTY_STRING# The 
+        self.OperandValue = 0# Line number
 
 
 def DisplayMenu():
@@ -150,7 +150,7 @@ def LoadFile(SourceCode):
             print("Error code 1:The file doesnt exist")
         else:
             print("Error code 2:The loaded file cannot be read correctly ")
-            SourceCode[0] = str(LineNumber - 1)
+            SourceCode[0] = str(LineNumber - 1)#line number is minussed by 1 because it represents the number of lines you can read wothout there being an error..
     if LineNumber > 0:
         DisplaySourceCode(SourceCode)
     return SourceCode
@@ -161,7 +161,7 @@ def EditSourceCode(SourceCode):
        Parameters: Array
        Return type: Array
        Description: Asks user the line number they want to edit and prints that line number. C=Cancel edit.  Ensures user enters a valid input. If user wants to edit they will
-       be asked to enter a new line.
+       be asked to enter a new line and it will add it to SourceCode.
     """
     LineNumber = int(input("Enter line number of code to edit: "))
     print(SourceCode[LineNumber])
@@ -195,7 +195,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
     """
        Parameters: String, integer, Array, dictionary
        Return type: Dictionary, Array
-       Description: This label is the name of the label e.g. NUM1, NUM2 START etc. .strip() removes any spaces from the string. Error code 4 is if the 5th character/ the
+       Description: This label is the name of the label e.g. NUM1, NUM2 START etc. .strip() removes any spaces from the string. Error code 4 is if the 5th index/ the
        character after the label isnt a colon. 
     """
     if len(Instruction) > 0:
@@ -206,7 +206,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
                 print("Error code 4:There is no colon after the opcode.")
                 Memory[0].OpCode = "ERR"
             else:
-                SymbolTable = UpdateSymbolTable(SymbolTable, ThisLabel, LineNumber)
+                SymbolTable = UpdateSymbolTable(SymbolTable, ThisLabel, LineNumber)# Key is label, Value is line number.- Used to get the line number
     return SymbolTable, Memory
 
 
@@ -220,7 +220,7 @@ def ExtractOpCode(Instruction, LineNumber, Memory):
     if len(Instruction) > 9:
         OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
         Operation = Instruction[7:10]
-        if len(Instruction) > 10:
+        if len(Instruction) > 10: #looking if there is anything after the opcode e.g. #
             AddressMode = Instruction[10:11]
             if AddressMode == '#':
                 Operation += AddressMode
@@ -257,11 +257,11 @@ def PassOne(SourceCode, Memory, SymbolTable):
     """
        Parameters: Array, , Dictionary
        Return type: Array, Dictionary
-       Description: Transfers SoruceCode into Instruction. It then extracts label, Opcode and operand
+       Description: Transfers SourceCode into Instruction. It then extracts label, Opcode and operand
     """
     NumberOfLines = int(SourceCode[0])
     for LineNumber in range(1, NumberOfLines + 1):
-        Instruction = SourceCode[LineNumber]
+        Instruction = SourceCode[LineNumber]#gets first instruction
         SymbolTable, Memory = ExtractLabel(Instruction, LineNumber, Memory, SymbolTable)
         Memory = ExtractOpCode(Instruction, LineNumber, Memory)
         Memory = ExtractOperand(Instruction, LineNumber, Memory)
@@ -278,9 +278,9 @@ def PassTwo(Memory, SymbolTable, NumberOfLines):
     for LineNumber in range(1, NumberOfLines + 1):
         Operand = Memory[LineNumber].OperandString
         if Operand != EMPTY_STRING:
-            if Operand in SymbolTable:
+            if Operand in SymbolTable: #Checking if the label is being used as operand.
                 OperandValue = SymbolTable[Operand]
-                Memory[LineNumber].OperandValue = OperandValue
+                Memory[LineNumber].OperandValue = OperandValue# All operand values are being changed to the line numbers for those labels.
             else:
                 try:
                     OperandValue = int(Operand)
@@ -333,6 +333,8 @@ def Assemble(SourceCode, Memory):
        Description:Resets Memory array. Initialises symbol table. SourceCode[0] is the number of lines in the code.If there is no Error in the code it sets the opcode in Memory[0] to
        JMP. It then also sets the operand in Memory[0] to the value of START in the dictionary SymbolTable. If there is no start then the operand value is set to 1. It assembles the code
        by passing Memory and Symbol table through the subroutines PassOne and PassTwo.
+
+       
     """
     Memory = ResetMemory(Memory)
     NumberOfLines = int(SourceCode[0])
@@ -341,9 +343,9 @@ def Assemble(SourceCode, Memory):
     if Memory[0].OpCode != "ERR":
         Memory[0].OpCode = "JMP"
         if "START" in SymbolTable:
-            Memory[0].OperandValue = SymbolTable["START"]
+            Memory[0].OperandValue = SymbolTable["START"]# it gets line number of the start.
         else:
-            Memory[0].OperandValue = 1
+            Memory[0].OperandValue = 1 # if theres no start it just starts from line 1
         Memory = PassTwo(Memory, SymbolTable, NumberOfLines)
     return Memory
 
@@ -634,7 +636,8 @@ def AssemblerSimulator():
     """
        Parameters:
        Return type:
-       Description: intialises SourceCode and Memory and resets both of them. Calls the following subroutines based upton the user inputs. 
+       Description: intialises SourceCode and Memory and resets both of them. Calls the following subroutines based upton the user inputs.
+       Memory is a list of object. it has 3 attributes opcode operand value and operand string.
     """
     SourceCode = [EMPTY_STRING for Lines in range(HI_MEM)]
     Memory = [AssemblerInstruction() for Lines in range(HI_MEM)]
@@ -665,9 +668,9 @@ def AssemblerSimulator():
                 Memory = Assemble(SourceCode, Memory)
         elif MenuOption == 'R':
             if Memory[0].OperandValue == 0:
-                print("Error code 10:The operand value is 0, meaning the code hasnt been Assembled properly")
+                print("Error code 10:The operand value is 0, meaning the code hasnt been Assembled properly(if it went through pass one then operand value would have been where the code starts.)")
             elif Memory[0].OpCode == "ERR":
-                print("Error code 11:The opcode is ERR, meaning there is an error.")
+                print("Error code 11:The opcode is ERR, meaning there is an error(Pass two is not successful).")
             else:
                 Execute(SourceCode, Memory)
         elif MenuOption == 'X':
