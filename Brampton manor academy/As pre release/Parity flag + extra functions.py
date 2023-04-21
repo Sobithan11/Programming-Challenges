@@ -119,7 +119,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
 
 def ExtractOpCode(Instruction, LineNumber, Memory):
   if len(Instruction) > 9:
-    OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
+    OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "BNE", "BLT", "BGT", "LSL", "LSR", "AND", "ORR", "EOR", "MVN", "   "]
     Operation = Instruction[7:10]
     if len(Instruction) > 10:
       AddressMode = Instruction[10:11]
@@ -321,6 +321,26 @@ def ExecuteBGT(Registers, Address):
     Registers[PC] = Address
   return Registers
 
+def ExecuteLSL(Registers, Operand):
+  Value=Registers[ACC]
+  #for i in range(0,Operand+1):
+  #    Value=Value*2
+  Value=Value<<Operand
+  Registers[ACC]=Value
+  return Registers
+
+def ExecuteLSR(Registers, Operand):
+  Value=Registers[ACC]
+  #for i in range(0,Operand+1):
+  #    Value=Value/2
+  Value=Value>>Operand
+  Registers[ACC]=Value      
+  return Registers
+
+def ExecuteAND(Registers, Binary1, Binary2):
+    
+    
+    
 
 def ExecuteJMP(Registers, Address): 
   Registers[PC] = Address
@@ -388,6 +408,16 @@ def Execute(SourceCode, Memory):
       ExecuteSKP()
     elif OpCode == "RTN":
       Registers = ExecuteRTN(Memory, Registers)
+    elif OpCode == "BNE":
+      Registers = ExecuteRTN(Memory, Address)
+    elif OpCode == "BLT":
+      Registers = ExecuteRTN(Memory, Address)
+    elif OpCode == "BGT":
+      Registers = ExecuteRTN(Memory, Address)
+    elif OpCode == "LSL#":
+      Registers = ExecuteRTN(Memory, Operand)
+    elif OpCode == "LSR#":
+      Registers = ExecuteRTN(Memory, Operand)
     if Registers[ERR] == 0:
       OpCode = Memory[Registers[PC]].OpCode    
       DisplayCurrentState(SourceCode, Memory, Registers)
