@@ -30,6 +30,7 @@ def DisplayMenu():
   print("E - Edit source code")
   print("A - Assemble program")
   print("R - Run the program")
+  print("S - Save the program")
   print("X - Exit simulator") 
   print()
 
@@ -96,12 +97,17 @@ def EditSourceCode(SourceCode):
       print("C - Cancel edit")
       Choice = input("Enter your choice: ")
     if Choice == "E":
-      SourceCode[LineNumber] = input("Enter the new line: ")   
+      SourceCode[LineNumber] = input("Enter the new line: ")
     DisplaySourceCode(SourceCode)
   return SourceCode
 
-def SaveEdit():
-  filename=input("Enter a suitable file name")
+def SaveSourceCode(SourceCode):
+    filename=input("Enter a suitable file name")
+    f=open(f"{filename}.txt","w")
+    for i in range(1,len(SourceCode)):
+      f.write(SourceCode[i])
+      f.write('\n')
+    f.close()
 
 def UpdateSymbolTable(SymbolTable, ThisLabel, LineNumber):
   if ThisLabel in SymbolTable:
@@ -124,7 +130,8 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
 
 def ExtractOpCode(Instruction, LineNumber, Memory):
   if len(Instruction) > 9:
-    OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "BNE", "BLT", "BGT", "LSL", "LSR", "AND", "ORR", "EOR", "MVN", "   "]
+    OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "BNE", "BLT", "BGT", "LSL", "LSR", "AND", "ORR", "EOR", "MVN", "ADD#",
+                    "SUB#", "CMP", "   "]
     Operation = Instruction[7:10]
     if len(Instruction) > 10:
       AddressMode = Instruction[10:11]
@@ -204,17 +211,40 @@ def Assemble(SourceCode, Memory):
     else:
       Memory[0].OperandValue = 1 
     Memory = PassTwo(Memory, SymbolTable, NumberOfLines)
+  Valid=False
+  for i in SourceCode:
+      if i.strip()=="HLT":
+          Valid=True
+  if Valid:
+      print("Halt Check: Yes")
+  else:
+      print("Halt Check: No")
   return Memory
 
 def ConvertToBinary(DecimalNumber): 
   BinaryString = EMPTY_STRING
-  while DecimalNumber > 0:
-    Remainder = DecimalNumber % 2
-    Bit = str(Remainder)
-    BinaryString = Bit + BinaryString
-    DecimalNumber = DecimalNumber // 2  
-  while len(BinaryString) < 4:
-    BinaryString = '0' + BinaryString
+  if DecimalNumber>0:
+    while DecimalNumber > 0:
+      Remainder = DecimalNumber % 2
+      Bit = str(Remainder)
+      BinaryString = Bit + BinaryString
+      DecimalNumber = DecimalNumber // 2
+    while len(BinaryString) < 4:
+      BinaryString = '0' + BinaryString    
+  elif DecimalNumber<0:
+    DecimalNumber=DecimalNumber*-1
+    BinaryValue=(bin(DecimalNumber)[2:])
+    result=""
+    for i in BinaryValue:
+        if i=="1":
+            result+="0"
+        elif i=="0":
+            result+="1"
+    result=ConvertToDecimal(result)
+    result=result+1
+    BinaryString=(bin(result)[2:])
+    while len(BinaryString) < 4:
+      BinaryString = '1' + BinaryString
   return BinaryString
 
 def ConvertToDecimal(BinaryString):
@@ -277,7 +307,7 @@ def ExecuteLDAimm(Registers, Operand):
   Registers = SetFlags(Registers[ACC], Registers)
   return Registers
 
-def ExecuteADD(Memory, Registers, Address): 
+def ExecuteADD(Memory, Registers, Address):
   Registers[ACC] = Registers[ACC] + Memory[Address].OperandValue
   Registers = SetFlags(Registers[ACC], Registers)
   if Registers[STATUS] == ConvertToDecimal("0010"):
@@ -286,7 +316,6 @@ def ExecuteADD(Memory, Registers, Address):
 
 def ExecuteSUB(Memory, Registers, Address):
   Registers[ACC] = Registers[ACC] - Memory[Address].OperandValue
-  print(ConvertToBinary(Registers[ACC]))
   if Registers[STATUS] == ConvertToDecimal("0010"):
     ReportRunTimeError("Overflow", Registers)
   return Registers
@@ -326,71 +355,100 @@ def ExecuteBGT(Registers, Address):
     Registers[PC] = Address
   return Registers
 
-def ExecuteLSL(Registers, Operand):
+def ExecuteLSL(Memory, Registers, Address):
   Value=Registers[ACC]
-  #for i in range(0,Operand+1):
-  #    Value=Value*2
-  Value=Value<<Operand
+  Value=Value<<(Memory[Address].OperandValue)
   Registers[ACC]=Value
   return Registers
 
-def ExecuteLSR(Registers, Operand):
+def ExecuteLSR(Memory, Registers, Address):
   Value=Registers[ACC]
-  #for i in range(0,Operand+1):
-  #    Value=Value/2
   Value=Value>>Operand
   Registers[ACC]=Value      
   return Registers
 
-def ExecuteAND(Registers, Binary1, Binary2):
+def ExecuteAND(Memory, Registers, Address):
   x=0
+  Binary1=ConvertToBinary(Registers[ACC])
+  Binary2=ConvertToBinary(Memory[Address].OperandValue)
+  if len(Binary1)<len(Binary2):
+    while len(Binary1)<len(Binary2):
+        Binary1="0"+Binary1
+  if len(Binary2)<len(Binary1):
+    while len(Binary2)<len(Binary1):
+        Binary2="0"+Binary2 
+  print(Binary1, Binary2)
   length=len(Binary1)
   Result=""
-  while x<length-1:
+  while x<=length-1:
     if Binary1[x]=="1" and Binary2[x]=="1":
       Result+="1"
     else:
       Result+="0"
     x+=1
+  print(Result)
   Registers[ACC]=ConvertToDecimal(Result)
   return Registers
       
-def ExecuteOR(Registers, Binary1, Binary2):
+def ExecuteORR(Memory, Registers, Address):
   x=0
+  Binary1=ConvertToBinary(Registers[ACC])
+  Binary2=ConvertToBinary(Memory[Address].OperandValue)
+  if len(Binary1)<len(Binary2):
+    while len(Binary1)<len(Binary2):
+        Binary1="0"+Binary1
+  if len(Binary2)<len(Binary1):
+    while len(Binary2)<len(Binary1):
+        Binary2="0"+Binary2
+  print(Binary1, Binary2)
   length=len(Binary1)
   Result=""
-  while x<length-1:
+  while x<=length-1:
     if Binary1[x]=="1" or Binary2[x]=="1":
       Result+="1"
     else:
       Result+="0"
     x+=1
+  print(Result)
   Registers[ACC]=ConvertToDecimal(Result)
   return Registers   
 
-def ExecuteEOR(Registers, Binary1, Binary2):
+def ExecuteEOR(Memory, Registers, Address):
   x=0
+  Binary1=ConvertToBinary(Registers[ACC])
+  Binary2=ConvertToBinary(Memory[Address].OperandValue)
+  if len(Binary1)<len(Binary2):
+    while len(Binary1)<len(Binary2):
+        Binary1="0"+Binary1
+  if len(Binary2)<len(Binary1):
+    while len(Binary2)<len(Binary1):
+        Binary2="0"+Binary2
+  print(Binary1, Binary2)
   length=len(Binary1)
   Result=""
-  while x<length-1:
+  while x<=length-1:
     if (Binary1[x]=="1" or Binary2[x]=="1") and (Binary1[x]!=Binary2[x]):
       Result+="1"
     else:
       Result+="0"
     x+=1
+  print(Result)
   Registers[ACC]=ConvertToDecimal(Result)
   return Registers
 
-def ExecuteMVN(Registers, Binary1):
+def ExecuteMVN(Registers):
   x=0
+  Binary1=ConvertToBinary(Registers[ACC])
+  print(Binary1)
   length=len(Binary1)
   Result=""
-  while x<length-1:
+  while x<=length-1:
     if Binary1[x]=="1":
       Result+="0"
     else:
       Result+="1"
     x+=1
+  print(Result)
   Registers[ACC]=ConvertToDecimal(Result)
   return Registers   
     
@@ -486,9 +544,23 @@ def Execute(SourceCode, Memory):
     elif OpCode == "BGT":
       Registers = ExecuteBGT(Registers, Operand)
     elif OpCode == "LSL":
-      Registers = ExecuteLSLimm(Memory, Operand)
+      Registers = ExecuteLSL(Memory, Registers, Operand)
     elif OpCode == "LSR":
-      Registers = ExecuteLSRimm(Memory, Operand)
+      Registers = ExecuteLSR(Memory, Registers, Operand)
+    elif OpCode == "AND":
+      Registers = ExecuteAND(Memory, Registers, Operand)
+    elif OpCode == "ORR":
+      Registers = ExecuteORR(Memory, Registers, Operand)
+    elif OpCode == "EOR":
+      Registers = ExecuteEOR(Memory, Registers, Operand)
+    elif OpCode == "MVN":
+      Registers = ExecuteMVN(Registers)
+    elif OpCode == "ADD#":
+      Registers = ExecuteADDimm(Registers, Operand)
+    elif OpCode == "SUB#":
+      Registers = ExecuteSUBimm(Registers, Operand)
+    elif OpCode == "CMP":
+      Registers = ExecuteCMP(Memory, Registers, Operand)
     if Registers[ERR] == 0:
       OpCode = Memory[Registers[PC]].OpCode    
       DisplayCurrentState(SourceCode, Memory, Registers)
@@ -530,7 +602,9 @@ def AssemblerSimulator():
       elif Memory[0].OpCode == "ERR":  
         print("Error Code 11")
       else:
-        Execute(SourceCode, Memory) 
+        Execute(SourceCode, Memory)
+    elif MenuOption == 'S':
+      SaveSourceCode(SourceCode)
     elif MenuOption == 'X':
       Finished = True
     else:
