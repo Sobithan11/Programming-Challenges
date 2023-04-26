@@ -546,7 +546,7 @@ def DisplayStack(Memory, Registers):
     for Index in range(Registers[TOS], HI_MEM):
         print("|{:>3d} |".format(Memory[Index].OperandValue))
     print(" ----")
-    print("Allowed:")
+    print("Allowed contents:")
     for Index in range(Registers[TOS], HI_MEM):
         if Memory[Index].OpCode == "":
             print("|{:>3d} |".format(Memory[Index].OperandValue))
@@ -563,8 +563,6 @@ def ExecuteJSR(Memory, Registers, Address):
     """
     StackPointer = Registers[TOS] - 1
     Memory[StackPointer].OperandValue = Registers[PC]
-    if Memory[StackPointer].OpCode != "":
-        print("Stack overflow error")
     Registers[PC] = Address
     Registers[TOS] = StackPointer
     DisplayStack(Memory, Registers)
@@ -602,6 +600,9 @@ def Execute(SourceCode, Memory):
     DisplayCurrentState(SourceCode, Memory, Registers)
     OpCode = Memory[Registers[PC]].OpCode
     while OpCode != "HLT":
+        if int(SourceCode[0]) == Registers[TOS]:
+          print("Stack overflow error")
+          break
         FrameNumber += 1
         print()
         DisplayFrameDelimiter(FrameNumber)
